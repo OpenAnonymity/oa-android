@@ -1,0 +1,38 @@
+# oa-android Agent Guide
+
+`oa-android` is a wrapper repo, not a fork of `oa-chat`.
+
+## Read Order
+
+1. `README.md`
+2. `docs/ARCHITECTURE.md`
+3. `docs/AGENT_LESSONS.md`
+4. Relevant files under `app/`
+
+## Core Rules
+
+- Never edit `oa-chat/` from this repo. It is a read-only submodule.
+- Keep product logic and UX in the web app unless Android must fill a platform gap.
+- Preserve the bundled origin as `https://chat.openanonymity.ai/`.
+- Prefer small native surfaces: App Links, WebView settings, file chooser, download delegation, save-file bridge, and passkey enablement.
+- If a change reveals a reusable Android-specific lesson or gotcha, update `docs/AGENT_LESSONS.md`.
+- If the runtime contract changes, update `docs/ARCHITECTURE.md` in the same change.
+
+## Key Paths
+
+- `build.gradle.kts`: root build logic and `prepareOaChatDist`
+- `buildSrc/src/main/kotlin/ai/openanonymity/android/build/OaChatBuildLayout.kt`: generated asset path contract
+- `app/build.gradle.kts`: Android module config and generated assets wiring
+- `app/src/main/java/ai/openanonymity/android/`: app shell, WebView, bridge, and native integration code
+- `app/src/test/java/`: JVM unit tests
+- `app/src/androidTest/java/`: instrumentation coverage
+
+## Verification Expectations
+
+Run the smallest relevant checks in this repo and record what did not run in your handoff. Prefer:
+
+```bash
+gradle :app:testDebugUnitTest
+gradle :app:assembleDebug
+gradle :app:connectedDebugAndroidTest
+```
