@@ -2,6 +2,8 @@
 
 `oa-android/` is a thin Android shell around the embedded `oa-chat` web app. Product logic stays in the `oa-chat/` submodule; Android owns packaging, app links, WebView hardening, file-handling gaps, downloads, and ticket-export save semantics.
 
+Live `oa-chat` app: [chat.openanonymity.ai](https://chat.openanonymity.ai/)
+
 ## Read First
 
 1. `AGENTS.md`
