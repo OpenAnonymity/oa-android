@@ -1,5 +1,8 @@
 # oa-android Architecture
 
+For the fuller handoff, including what is new, different, and worse than plain `oa-chat`,
+read `docs/HOW_IT_WORKS.md` first.
+
 ## Role
 
 `oa-android` packages `oa-chat` inside a hardened Android WebView while preserving the web app's production origin and routing assumptions.
@@ -31,6 +34,7 @@ The shell intentionally stays narrow:
 - `oa-chat` still builds the request body and still parses SSE lines into reasoning/content/images/tokens, which keeps the visible product behavior aligned with web/desktop.
 - Launcher re-entry without a deep link intentionally preserves the current WebView page instead of force-loading the root URL again. That matters because a `singleTask` launcher reopen would otherwise wipe the in-flight JS state even if the activity survived.
 - The current native transport path is direct HTTPS. It does not yet mirror the browser-side proxy/libcurl relay path used by `networkProxy.js`.
+- The current service is still in the main app process and keeps active jobs in memory only. Process death still loses active work.
 
 See `docs/NATIVE_BACKGROUND_STREAMING_PLAN.md` for the recommended redesign.
 

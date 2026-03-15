@@ -5,9 +5,10 @@
 ## Read First
 
 1. `AGENTS.md`
-2. `docs/ARCHITECTURE.md`
-3. `docs/AGENT_LESSONS.md`
-4. `docs/NATIVE_BACKGROUND_STREAMING_PLAN.md` when working on background execution
+2. `docs/HOW_IT_WORKS.md`
+3. `docs/ARCHITECTURE.md`
+4. `docs/AGENT_LESSONS.md`
+5. `docs/NATIVE_BACKGROUND_STREAMING_PLAN.md` when working on background execution
 
 ## Repo Shape
 
@@ -51,6 +52,9 @@ The root `prepareOaChatDist` task runs `npm install` + `npm run build` inside `o
 - Serve bundled assets on `https://chat.openanonymity.ai/` with `WebViewAssetLoader`.
 - Preserve OA web URLs unchanged when routing App Links into the local WebView.
 - Keep native bridges narrow and generic.
+
+For the detailed explanation of where the wrapper stays thin, where it no longer does, and
+what is currently worse than plain `oa-chat`, read `docs/HOW_IT_WORKS.md`.
 
 ## Background Streaming MVP
 

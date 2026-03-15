@@ -5,9 +5,10 @@
 ## Read Order
 
 1. `README.md`
-2. `docs/ARCHITECTURE.md`
-3. `docs/AGENT_LESSONS.md`
-4. Relevant files under `app/`
+2. `docs/HOW_IT_WORKS.md`
+3. `docs/ARCHITECTURE.md`
+4. `docs/AGENT_LESSONS.md`
+5. Relevant files under `app/`
 
 ## Core Rules
 
@@ -16,6 +17,7 @@
 - Keep product logic and UX in the web app unless Android must fill a platform gap.
 - Preserve the bundled origin as `https://chat.openanonymity.ai/`.
 - Prefer small native surfaces: App Links, WebView settings, file chooser, download delegation, save-file bridge, and passkey enablement.
+- Background streaming is the main exception to the "thin wrapper" rule. Read `docs/HOW_IT_WORKS.md` and `docs/NATIVE_BACKGROUND_STREAMING_PLAN.md` before expanding it further.
 - If a change reveals a reusable Android-specific lesson or gotcha, update `docs/AGENT_LESSONS.md`.
 - If the runtime contract changes, update `docs/ARCHITECTURE.md` in the same change.
 
