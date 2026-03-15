@@ -12,6 +12,7 @@
 ## Core Rules
 
 - Never edit `oa-chat/` from this repo. It is a read-only submodule.
+- For local workspace development, the build can fall back to sibling `../oa-chat` if `oa-android/oa-chat/` is not initialized yet. Treat that only as a packaging convenience, not a repo-boundary change.
 - Keep product logic and UX in the web app unless Android must fill a platform gap.
 - Preserve the bundled origin as `https://chat.openanonymity.ai/`.
 - Prefer small native surfaces: App Links, WebView settings, file chooser, download delegation, save-file bridge, and passkey enablement.
@@ -32,7 +33,7 @@
 Run the smallest relevant checks in this repo and record what did not run in your handoff. Prefer:
 
 ```bash
-gradle :app:testDebugUnitTest
-gradle :app:assembleDebug
-gradle :app:connectedDebugAndroidTest
+./gradlew :app:testDebugUnitTest
+./gradlew :app:assembleDebug
+./gradlew :app:connectedDebugAndroidTest
 ```

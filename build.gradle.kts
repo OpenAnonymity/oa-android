@@ -1,7 +1,7 @@
 import ai.openanonymity.android.build.OaChatBuildLayout
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
@@ -11,24 +11,32 @@ plugins {
 }
 
 abstract class PrepareOaChatDistTask : DefaultTask() {
-    @get:InputDirectory
-    abstract val oaChatDir: DirectoryProperty
+    @get:Internal
+    abstract val oaChatSubmoduleDir: DirectoryProperty
+
+    @get:Internal
+    abstract val workspaceOaChatDir: DirectoryProperty
 
     @get:OutputDirectory
     abstract val outputDir: DirectoryProperty
 
     @TaskAction
     fun prepare() {
-        val oaChatRoot = oaChatDir.get().asFile
+        val oaChatRoot = resolveOaChatRoot()
+        require(oaChatRoot != null) {
+            val submodulePath = oaChatSubmoduleDir.get().asFile.absolutePath
+            val workspacePath = workspaceOaChatDir.get().asFile.absolutePath
+            "Missing oa-chat checkout. Expected either $submodulePath or sibling workspace repo at $workspacePath."
+        }
         require(oaChatRoot.resolve("package.json").isFile) {
-            "Missing oa-chat submodule at ${oaChatRoot.absolutePath}. Run `git submodule update --init --recursive`."
+            "Found oa-chat directory at ${oaChatRoot.absolutePath}, but package.json is missing."
         }
 
         fun run(vararg command: String) {
-            project.exec {
+            project.providers.exec {
                 workingDir = oaChatRoot
                 commandLine(*command)
-            }.assertNormalExitValue()
+            }.result.get().assertNormalExitValue()
         }
 
         logger.lifecycle("[oa-chat] Installing dependencies...")
@@ -48,6 +56,22 @@ abstract class PrepareOaChatDistTask : DefaultTask() {
             into(outputDir.get().asFile)
         }
     }
+
+    private fun resolveOaChatRoot(): java.io.File? {
+        val submoduleDir = oaChatSubmoduleDir.orNull?.asFile
+        val workspaceDir = workspaceOaChatDir.orNull?.asFile
+
+        val submoduleIsInitialized = submoduleDir?.resolve(".git")?.exists() == true
+        if (submoduleIsInitialized && submoduleDir?.resolve("package.json")?.isFile == true) {
+            return submoduleDir
+        }
+
+        if (workspaceDir?.resolve("package.json")?.isFile == true) {
+            return workspaceDir
+        }
+
+        return submoduleDir?.takeIf { it.resolve("package.json").isFile }
+    }
 }
 
 val generatedAssetsDir = layout.buildDirectory.dir(OaChatBuildLayout.generatedAssetsDistSubpath())
@@ -55,6 +79,7 @@ val generatedAssetsDir = layout.buildDirectory.dir(OaChatBuildLayout.generatedAs
 tasks.register<PrepareOaChatDistTask>("prepareOaChatDist") {
     group = "build"
     description = "Builds oa-chat and copies dist into generated Android assets."
-    oaChatDir.set(layout.projectDirectory.dir(OaChatBuildLayout.OA_CHAT_SUBMODULE_DIR))
+    oaChatSubmoduleDir.set(layout.projectDirectory.dir(OaChatBuildLayout.OA_CHAT_SUBMODULE_DIR))
+    workspaceOaChatDir.set(layout.projectDirectory.dir("../oa-chat"))
     outputDir.set(generatedAssetsDir)
 }

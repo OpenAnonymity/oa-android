@@ -61,8 +61,21 @@ class FileInputIntegrationTest {
                 """
                     window.__oaUploadResult = 'pending';
                     (() => {
+                      const existing = document.getElementById('oa-test-file-input');
+                      if (existing) existing.remove();
+
                       const input = document.createElement('input');
+                      input.id = 'oa-test-file-input';
                       input.type = 'file';
+                      input.style.position = 'fixed';
+                      input.style.left = '24px';
+                      input.style.top = '24px';
+                      input.style.width = '240px';
+                      input.style.height = '56px';
+                      input.style.opacity = '1';
+                      input.style.zIndex = '2147483647';
+                      input.style.background = '#ffffff';
+                      input.style.color = '#000000';
                       input.onchange = async () => {
                         const file = input.files && input.files[0];
                         window.__oaUploadResult = JSON.stringify({
@@ -72,10 +85,16 @@ class FileInputIntegrationTest {
                         });
                       };
                       document.body.appendChild(input);
-                      input.click();
                     })();
                 """.trimIndent()
             )
+            WebViewTestUtils.waitUntil {
+                WebViewTestUtils.evaluateJavascript(
+                    activity.webViewForTesting(),
+                    "!!document.getElementById('oa-test-file-input')"
+                ) == "true"
+            }
+            WebViewTestUtils.tapElement(activity.webViewForTesting(), "#oa-test-file-input")
 
             WebViewTestUtils.waitUntil {
                 val value = WebViewTestUtils.evaluateJavascript(

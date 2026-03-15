@@ -2,6 +2,7 @@ package ai.openanonymity.android.bridge
 
 object SaveFilePickerPolyfill {
     const val JS_INTERFACE_NAME = "oaSavePickerNative"
+    const val JS_INTERFACE_FALLBACK_NAME = "oaSavePickerAndroid"
     const val CALLBACK_NAME = "__oaAndroidSavePickerNativeResult"
 
     fun documentStartScript(): String {
@@ -47,6 +48,13 @@ object SaveFilePickerPolyfill {
                 const mimeType = Object.keys(accept)[0] || 'application/octet-stream';
                 const suggestedName = options.suggestedName || 'download.json';
                 let body = '';
+                const bridge = (
+                  (window.${JS_INTERFACE_NAME} && typeof window.${JS_INTERFACE_NAME}.postMessage === 'function')
+                    ? window.${JS_INTERFACE_NAME}
+                    : ((window.${JS_INTERFACE_FALLBACK_NAME} && typeof window.${JS_INTERFACE_FALLBACK_NAME}.postMessage === 'function')
+                        ? window.${JS_INTERFACE_FALLBACK_NAME}
+                        : null)
+                );
 
                 return {
                   async createWritable() {
@@ -55,8 +63,11 @@ object SaveFilePickerPolyfill {
                         body += await toText(chunk);
                       },
                       async close() {
+                        if (!bridge) {
+                          throw new DOMException('Native save bridge is unavailable.', 'NotSupportedError');
+                        }
                         const completion = new Promise((resolve, reject) => pending.set(token, { resolve, reject }));
-                        ${JS_INTERFACE_NAME}.postMessage(JSON.stringify({
+                        bridge.postMessage(JSON.stringify({
                           token,
                           suggestedName,
                           mimeType,

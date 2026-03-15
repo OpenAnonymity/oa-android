@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Open Anonymity</string>
-    <string name="loading_message">Loading Open Anonymity...</string>
-    <string name="error_title">Couldn't load Open Anonymity</string>
-    <string name="error_message">Retry the bundled app or reopen the link.</string>
-    <string name="retry">Retry</string>
+    <string name="oa_loading_message">Loading Open Anonymity...</string>
+    <string name="oa_error_title">Couldn\'t load Open Anonymity</string>
+    <string name="oa_error_message">Retry the bundled app or reopen the link.</string>
+    <string name="oa_retry">Retry</string>
+    <string name="inference_notification_channel_name">Active model responses</string>
+    <string name="inference_notification_channel_description">Keeps model responses running while the app is in the background.</string>
+    <string name="inference_notification_title">Model response in progress</string>
+    <plurals name="inference_notification_body">
+        <item quantity="one">%d response is still streaming in the background.</item>
+        <item quantity="other">%d responses are still streaming in the background.</item>
+    </plurals>
 </resources>

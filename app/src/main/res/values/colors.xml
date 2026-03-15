@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="oa_background">#F4F2EA</color>
+    <color name="oa_app_background">#FFFFFF</color>
     <color name="oa_surface">#FFFFFF</color>
     <color name="oa_primary">#1F3A2B</color>
     <color name="oa_on_primary">#FFFFFF</color>

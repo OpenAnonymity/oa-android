@@ -7,6 +7,7 @@
 1. `AGENTS.md`
 2. `docs/ARCHITECTURE.md`
 3. `docs/AGENT_LESSONS.md`
+4. `docs/NATIVE_BACKGROUND_STREAMING_PLAN.md` when working on background execution
 
 ## Repo Shape
 
@@ -32,12 +33,14 @@ npm install
 cd ..
 ```
 
+If the nested `oa-chat/` submodule has not been initialized yet but you are working inside the shared OA workspace, the Gradle build can also fall back to the sibling checkout at `../oa-chat`.
+
 ## Main Commands
 
 ```bash
-gradle :app:testDebugUnitTest
-gradle :app:assembleDebug
-gradle :app:connectedDebugAndroidTest
+./gradlew :app:testDebugUnitTest
+./gradlew :app:assembleDebug
+./gradlew :app:connectedDebugAndroidTest
 ```
 
 The root `prepareOaChatDist` task runs `npm install` + `npm run build` inside `oa-chat/` and copies `dist/` into generated Android assets. `:app:preBuild` depends on it, so normal app builds bundle the web app automatically.
@@ -49,7 +52,25 @@ The root `prepareOaChatDist` task runs `npm install` + `npm run build` inside `o
 - Preserve OA web URLs unchanged when routing App Links into the local WebView.
 - Keep native bridges narrow and generic.
 
+## Background Streaming MVP
+
+Android now keeps active model streams alive across Home/app switching by moving the
+active OpenRouter HTTP/SSE transport into a native foreground service while keeping
+request construction, SSE parsing, UI, and normal chat state in `oa-chat`.
+
+Current contract:
+
+- access issuance still happens in `oa-chat` before the native stream starts
+- once a stream starts, Android owns the network call and buffers SSE lines until the
+  page polls them again
+- reopening the app from the launcher no longer force-reloads the WebView if there is
+  no deep link, so the in-flight page state survives launcher re-entry
+- this MVP currently uses native direct HTTPS for the active model stream rather than
+  the browser-side proxy/libcurl path
+
+Remaining redesign work is tracked in `docs/NATIVE_BACKGROUND_STREAMING_PLAN.md`.
+
 ## Verification
 
 - JVM unit tests cover routing, asset resolution, MIME/path handling, external-link policy, save-picker result protocol, and build-layout wiring.
-- Instrumentation tests cover asset loading, storage persistence, file input, App Link routing, and ticket-export save/cancel semantics.
+- Instrumentation tests cover asset loading, storage persistence, file input, App Link routing, ticket-export save/cancel semantics, and background streaming across Home/launcher resume via a native mock stream.

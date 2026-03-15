@@ -2,7 +2,6 @@ package ai.openanonymity.android.bridge
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.json.JSONObject
 import org.junit.Test
 
 class SaveFilePickerProtocolTest {
@@ -32,8 +31,8 @@ class SaveFilePickerProtocolTest {
         )
 
         assertTrue(script.contains(SaveFilePickerPolyfill.CALLBACK_NAME))
-        assertTrue(script.contains("\"saved\":true"))
-        assertTrue(script.contains("\"token\":\"tok-2\""))
+        assertTrue(script.contains("\\\"saved\\\":true"))
+        assertTrue(script.contains("\\\"token\\\":\\\"tok-2\\\""))
     }
 
     @Test
@@ -42,7 +41,7 @@ class SaveFilePickerProtocolTest {
             SaveFilePickerResult(token = "tok-3", saved = false, error = "cancelled")
         )
 
-        assertTrue(script.contains("\"saved\":false"))
-        assertTrue(script.contains("\"error\":\"cancelled\""))
+        assertTrue(script.contains("\\\"saved\\\":false"))
+        assertTrue(script.contains("\\\"error\\\":\\\"cancelled\\\""))
     }
 }

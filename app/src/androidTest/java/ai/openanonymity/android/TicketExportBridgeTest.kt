@@ -81,20 +81,66 @@ class TicketExportBridgeTest {
             activity.webViewForTesting(),
             """
                 window.__oaTicketExportResult = 'pending';
-                (async () => {
-                  const ticketStore = (await import('/services/ticketStore.js')).default;
-                  await ticketStore.setActiveTickets([{ finalized_ticket: 'ticket-1' }]);
-                  const exports = await import('/services/globalExport.js');
-                  const result = await exports.exportTickets();
-                  const remaining = ticketStore.getCount();
-                  window.__oaTicketExportResult = JSON.stringify({
-                    success: !!result.success,
-                    remaining,
-                    cancelled: !!result.cancelled,
-                  });
+                window.__oaTicketExportReady = false;
+                (() => {
+                  const existingScript = document.getElementById('oa-test-export-module');
+                  if (existingScript) existingScript.remove();
+                  const existingButton = document.getElementById('oa-test-export-button');
+                  if (existingButton) existingButton.remove();
+
+                  const script = document.createElement('script');
+                  script.id = 'oa-test-export-module';
+                  script.type = 'module';
+                  script.textContent = `
+                    import ticketStore from '/services/ticketStore.js';
+                    import * as exportsModule from '/services/globalExport.js';
+
+                    (async () => {
+                      try {
+                        await ticketStore.setActiveTickets([{ finalized_ticket: 'ticket-1' }]);
+                        const button = document.createElement('button');
+                        button.id = 'oa-test-export-button';
+                        button.textContent = 'Export tickets';
+                        button.style.position = 'fixed';
+                        button.style.left = '24px';
+                        button.style.top = '24px';
+                        button.style.width = '240px';
+                        button.style.height = '56px';
+                        button.style.zIndex = '2147483647';
+                        button.style.background = '#ffffff';
+                        button.style.color = '#000000';
+                        button.addEventListener('click', async () => {
+                          const result = await exportsModule.exportTickets();
+                          const remaining = ticketStore.getCount();
+                          window.__oaTicketExportResult = JSON.stringify({
+                            success: !!result.success,
+                            remaining,
+                            cancelled: !!result.cancelled,
+                          });
+                        });
+                        document.body.appendChild(button);
+                        window.__oaTicketExportReady = true;
+                      } catch (error) {
+                        window.__oaTicketExportResult = JSON.stringify({
+                          success: false,
+                          remaining: -1,
+                          cancelled: false,
+                          error: String(error),
+                        });
+                      }
+                    })();
+                  `;
+                  document.body.appendChild(script);
                 })();
             """.trimIndent()
         )
+        WebViewTestUtils.waitUntil {
+            WebViewTestUtils.evaluateJavascript(
+                activity.webViewForTesting(),
+                "window.__oaTicketExportReady"
+            ) == "true"
+        }
+        WebViewTestUtils.tapElement(activity.webViewForTesting(), "#oa-test-export-button")
 
         WebViewTestUtils.waitUntil {
             val value = WebViewTestUtils.evaluateJavascript(

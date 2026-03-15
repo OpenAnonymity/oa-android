@@ -1,7 +1,9 @@
 package ai.openanonymity.android.bridge
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
@@ -48,7 +50,18 @@ class SaveFilePickerBridge(
         )
     }
 
+    @SuppressLint("JavascriptInterface")
     fun attach() {
+        webView.addJavascriptInterface(
+            object {
+                @JavascriptInterface
+                fun postMessage(rawMessage: String) {
+                    handleRequest(rawMessage)
+                }
+            },
+            SaveFilePickerPolyfill.JS_INTERFACE_FALLBACK_NAME,
+        )
+
         if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) {
             WebViewCompat.addWebMessageListener(
                 webView,
@@ -75,6 +88,12 @@ class SaveFilePickerBridge(
                 SaveFilePickerPolyfill.documentStartScript(),
                 setOf(ai.openanonymity.android.OaAppOrigin.ORIGIN_RULE),
             )
+        }
+    }
+
+    fun ensurePageWorldPolyfill() {
+        webView.post {
+            webView.evaluateJavascript(SaveFilePickerPolyfill.documentStartScript(), null)
         }
     }
 
